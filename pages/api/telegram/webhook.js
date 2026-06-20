@@ -18,14 +18,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const expectedSecret = process.env.MESSAGE_WEBHOOK_SECRET;
+function getTelegramWebhookSecret() {
+  return process.env.MESSAGE_WEBHOOK_SECRET || process.env.TELEGRAM_WEBHOOK_SECRET || "";
+}
+
+function getTelegramAdminId() {
+  return String(process.env.MESSAGE_ADMIN_ID || process.env.TELEGRAM_ADMIN_ID || "");
+}
+
+  const expectedSecret = getTelegramWebhookSecret();
   const providedSecret = req.headers["x-telegram-bot-api-secret-token"];
 
   if (!expectedSecret || providedSecret !== expectedSecret) {
     return res.status(401).json({ error: "Invalid Telegram secret." });
   }
 
-  const adminId = String(process.env.MESSAGE_ADMIN_ID || "");
+  const adminId = getTelegramAdminId();
   const callback = req.body?.callback_query;
   const message = req.body?.message;
   const actorId = String(callback?.from?.id || message?.from?.id || "");
