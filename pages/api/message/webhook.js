@@ -10,7 +10,7 @@ import {
   sendMessageAdminPanel,
   sendMessagePendingCodes,
   sendMessagePendingEntries
-} from "../../../lib/telegram";
+} from "../../../lib/message";
 
 const getMessageWebhookSecret = () =>
   process.env.MESSAGE_WEBHOOK_SECRET || process.env.TELEGRAM_WEBHOOK_SECRET || "";

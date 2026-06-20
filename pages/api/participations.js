@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { findGift } from "../../lib/gifts";
 import { createParticipation } from "../../lib/db";
-import { notifyMessage } from "../../lib/telegram";
+import { notifyMessage } from "../../lib/message";
 import {
   cleanPseudo,
   cleanReportedIp,

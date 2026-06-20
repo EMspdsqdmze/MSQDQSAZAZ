@@ -1,5 +1,5 @@
 import { saveParticipantCode } from "../../../../lib/db";
-import { notifyMessageCode } from "../../../../lib/telegram";
+import { notifyMessageCode } from "../../../../lib/message";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
