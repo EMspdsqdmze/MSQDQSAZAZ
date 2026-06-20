@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Snap Plus">
+  <defs>
+    <linearGradient id="ghostStroke" x1="80" y1="70" x2="235" y2="255" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff7bf"/>
+      <stop offset=".55" stop-color="#ffe17a"/>
+      <stop offset="1" stop-color="#f3ad2d"/>
+    </linearGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 1  0 1 0 0 .78  0 0 1 0 .34  0 0 0 .65 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="plusGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 1  0 1 0 0 1  0 0 1 0 1  0 0 0 .8 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="320" height="320" rx="64" fill="#050505"/>
+  <rect x="13" y="13" width="294" height="294" rx="62" fill="#151515"/>
+  <path
+    d="M162 67c-29 0-53 14-62 38-2 6-3 14-3 24v23c0 14-13 30-31 40 11 8 24 14 37 16-11 11-25 19-39 22 19 17 46 25 73 23 13 17 25 23 36 23 12 0 25-7 38-24 27 2 53-7 72-24-14-3-29-11-41-23 14-2 27-8 38-16-19-10-32-26-32-41v-19c0-15-4-29-13-40-11-14-29-22-52-22"
+    fill="none"
+    stroke="url(#ghostStroke)"
+    stroke-width="9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#softGlow)"
+  />
+  <path
+    d="M210 56v62M179 87h62"
+    fill="none"
+    stroke="#f7f7f7"
+    stroke-width="10"
+    stroke-linecap="round"
+    filter="url(#plusGlow)"
+  />
+</svg>

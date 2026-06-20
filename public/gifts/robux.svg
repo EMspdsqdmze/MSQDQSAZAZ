@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Robux">
+  <defs>
+    <linearGradient id="rbxBg" x1="38" y1="36" x2="285" y2="292" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f172a"/>
+      <stop offset=".55" stop-color="#111827"/>
+      <stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="rbxGreen" x1="78" y1="62" x2="244" y2="258" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8ef0b3"/>
+      <stop offset="1" stop-color="#17a653"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="70" fill="url(#rbxBg)"/>
+  <rect x="74" y="74" width="172" height="172" rx="28" fill="url(#rbxGreen)" transform="rotate(14 160 160)"/>
+  <rect x="130" y="130" width="60" height="60" rx="10" fill="#07100d" transform="rotate(14 160 160)"/>
+  <path d="M70 252h180" stroke="#35e47a" stroke-width="12" stroke-linecap="round" opacity=".38"/>
+  <text x="160" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="31" font-weight="900" fill="#eafff2">ROBUX</text>
+</svg>

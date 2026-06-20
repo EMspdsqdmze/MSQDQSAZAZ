@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Carte Xbox">
+  <defs>
+    <linearGradient id="xboxBg" x1="34" y1="28" x2="286" y2="294" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#107c10"/>
+      <stop offset=".62" stop-color="#054b16"/>
+      <stop offset="1" stop-color="#031308"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="70" fill="#050505"/>
+  <rect x="38" y="58" width="244" height="164" rx="28" fill="url(#xboxBg)"/>
+  <circle cx="160" cy="140" r="70" fill="#ffffff"/>
+  <path d="M105 105c28 8 43 20 55 37 13-17 28-29 55-37-12-16-31-26-55-26s-43 10-55 26Z" fill="#107c10"/>
+  <path d="M102 176c23-41 41-58 58-72 17 14 35 31 58 72-13 21-34 34-58 34s-45-13-58-34Z" fill="#107c10"/>
+  <text x="160" y="267" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="900" fill="#ffffff">XBOX</text>
+</svg>
