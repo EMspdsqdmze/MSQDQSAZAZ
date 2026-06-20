@@ -64,15 +64,18 @@ export default function Admin() {
     try {
       data = await response.json();
     } catch {
+      const text = await response.text();
       setRefreshing(false);
-      setError("Réponse invalide de l'API admin.");
+      setError(
+        `Erreur API admin ${response.status}: ${text || response.statusText}`
+      );
       return;
     }
 
     setRefreshing(false);
 
     if (!response.ok) {
-      setError(data.error || "Accès refusé.");
+      setError(data.error || `Accès refusé (${response.status}).`);
       return;
     }
 

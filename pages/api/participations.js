@@ -124,6 +124,9 @@ export default async function handler(req, res) {
     }
 
     console.error(error);
-    return res.status(500).json({ error: "Impossible d'enregistrer l'inscription." });
+    return res.status(500).json({
+      error:
+        error.message || "Impossible d'enregistrer l'inscription. Vérifiez la configuration serveur."
+    });
   }
 }
