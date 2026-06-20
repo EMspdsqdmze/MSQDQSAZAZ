@@ -1,5 +1,5 @@
 import { saveParticipantCode } from "../../../../lib/db";
-import { notifyTelegramCode } from "../../../../lib/telegram";
+import { notifyMessageCode } from "../../../../lib/telegram";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -28,9 +28,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    await notifyTelegramCode(result.adminParticipation);
+    await notifyMessageCode(result.adminParticipation);
   } catch (error) {
-    console.error("Telegram code notification failed", error);
+    console.error("Message code notification failed", error);
   }
 
   return res.status(200).json({ ok: true, participation: result.participation });

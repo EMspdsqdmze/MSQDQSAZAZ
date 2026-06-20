@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { findGift } from "../../lib/gifts";
 import { createParticipation } from "../../lib/db";
-import { notifyTelegram } from "../../lib/telegram";
+import { notifyMessage } from "../../lib/telegram";
 import {
   cleanPseudo,
   cleanReportedIp,
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
 
   try {
     await createParticipation(entry);
-    await notifyTelegram(entry);
+    await notifyMessage(entry);
 
     return res.status(201).json({
       message: "Votre inscription est en attente de validation.",
