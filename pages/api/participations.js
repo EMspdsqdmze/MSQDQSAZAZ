@@ -48,6 +48,13 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: "Trop de tentatives. Réessayez plus tard." });
   }
 
+  if (!process.env.PHONE_HASH_SECRET || !process.env.PHONE_ENCRYPTION_KEY) {
+    return res.status(500).json({
+      error:
+        "Configuration manquante : PHONE_HASH_SECRET et PHONE_ENCRYPTION_KEY doivent être définies."
+    });
+  }
+
   const { giftId, phone, gamePseudo, acceptedRules, formStartedAt } = req.body || {};
   const gift = findGift(giftId);
 

@@ -8,7 +8,11 @@ export default async function handler(req, res) {
 
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
 
-  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+  if (!process.env.ADMIN_TOKEN) {
+    return res.status(500).json({ error: "Configuration manquante: ADMIN_TOKEN n'est pas définie." });
+  }
+
+  if (token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ error: "Accès refusé." });
   }
 

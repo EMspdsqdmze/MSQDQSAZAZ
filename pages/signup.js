@@ -89,20 +89,33 @@ export default function Signup() {
       setBrowserPublicIp(publicIp);
     }
 
-    const response = await fetch("/api/participations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        giftId: selectedGift,
-        phone: buildPhoneWithCountry(phoneCountry, phone),
-        gamePseudo,
-        acceptedRules,
-        formStartedAt,
-        browserPublicIp: publicIp
-      })
-    });
+    let response;
+    let data;
 
-    const data = await response.json();
+    try {
+      response = await fetch("/api/participations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          giftId: selectedGift,
+          phone: buildPhoneWithCountry(phoneCountry, phone),
+          gamePseudo,
+          acceptedRules,
+          formStartedAt,
+          browserPublicIp: publicIp
+        })
+      });
+    } catch (error) {
+      setStatus({ type: "error", text: "Impossible de contacter le serveur." });
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setStatus({ type: "error", text: "Réponse serveur invalide." });
+      return;
+    }
 
     if (!response.ok) {
       setStatus({ type: "error", text: data.error || "Une erreur est survenue." });

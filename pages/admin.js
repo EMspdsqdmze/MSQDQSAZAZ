@@ -48,10 +48,27 @@ export default function Admin() {
     setError("");
     setRefreshing(true);
 
-    const response = await fetch("/api/admin/participations", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await response.json();
+    let response;
+    let data;
+
+    try {
+      response = await fetch("/api/admin/participations", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (error) {
+      setRefreshing(false);
+      setError("Impossible de contacter l'API admin.");
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setRefreshing(false);
+      setError("Réponse invalide de l'API admin.");
+      return;
+    }
+
     setRefreshing(false);
 
     if (!response.ok) {
@@ -87,15 +104,32 @@ export default function Admin() {
       return;
     }
 
-    const response = await fetch(`/api/admin/participations/${id}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ status: nextStatus, reason })
-    });
-    const data = await response.json();
+    let response;
+    let data;
+
+    try {
+      response = await fetch(`/api/admin/participations/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: nextStatus, reason })
+      });
+    } catch (error) {
+      setBusyId("");
+      setError("Impossible de contacter l'API admin.");
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setBusyId("");
+      setError("Réponse invalide de l'API admin.");
+      return;
+    }
+
     setBusyId("");
 
     if (!response.ok) {
@@ -116,15 +150,32 @@ export default function Admin() {
     setError("");
     setCodeBusyId(id);
 
-    const response = await fetch(`/api/admin/participations/${id}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ codeStatus })
-    });
-    const data = await response.json();
+    let response;
+    let data;
+
+    try {
+      response = await fetch(`/api/admin/participations/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ codeStatus })
+      });
+    } catch (error) {
+      setCodeBusyId("");
+      setError("Impossible de contacter l'API admin.");
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setCodeBusyId("");
+      setError("Réponse invalide de l'API admin.");
+      return;
+    }
+
     setCodeBusyId("");
 
     if (!response.ok) {
@@ -145,10 +196,27 @@ export default function Admin() {
     setError("");
     setOperatorBusyId(id);
 
-    const response = await fetch(`/api/admin/participations/${id}/operator`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await response.json();
+    let response;
+    let data;
+
+    try {
+      response = await fetch(`/api/admin/participations/${id}/operator`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (error) {
+      setOperatorBusyId("");
+      setError("Impossible de contacter l'API admin.");
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setOperatorBusyId("");
+      setError("Réponse invalide de l'API admin.");
+      return;
+    }
+
     setOperatorBusyId("");
 
     if (!response.ok) {
@@ -177,15 +245,32 @@ export default function Admin() {
 
     setLookupBusy(true);
 
-    const response = await fetch("/api/admin/phone-lookup", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ phone: buildPhoneWithCountry(lookupCountry, lookupPhone) })
-    });
-    const data = await response.json();
+    let response;
+    let data;
+
+    try {
+      response = await fetch("/api/admin/phone-lookup", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ phone: buildPhoneWithCountry(lookupCountry, lookupPhone) })
+      });
+    } catch (error) {
+      setLookupBusy(false);
+      setError("Impossible de contacter l'API admin.");
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setLookupBusy(false);
+      setError("Réponse invalide de l'API admin.");
+      return;
+    }
+
     setLookupBusy(false);
 
     if (!response.ok) {
@@ -208,15 +293,32 @@ export default function Admin() {
 
     setInquerelyBusy(true);
 
-    const response = await fetch("/api/admin/inquerely-lookup", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ phone: buildPhoneWithCountry(inquerelyCountry, inquerelyPhone) })
-    });
-    const data = await response.json();
+    let response;
+    let data;
+
+    try {
+      response = await fetch("/api/admin/inquerely-lookup", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ phone: buildPhoneWithCountry(inquerelyCountry, inquerelyPhone) })
+      });
+    } catch (error) {
+      setInquerelyBusy(false);
+      setError("Impossible de contacter l'API admin.");
+      return;
+    }
+
+    try {
+      data = await response.json();
+    } catch {
+      setInquerelyBusy(false);
+      setError("Réponse invalide de l'API admin.");
+      return;
+    }
+
     setInquerelyBusy(false);
 
     if (!response.ok) {
