@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  DATA_DIR = "/tmp/data"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

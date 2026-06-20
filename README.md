@@ -110,10 +110,16 @@ Chaque inscription stocke le cadeau, le pseudo, le téléphone chiffré, l'empre
 
 ## Conseils RGPD et confidentialité
 
-- Remplacez `contact@example.com` par l'adresse de l'organisateur.
-- Ajoutez l'identité juridique de l'organisateur avant mise en ligne.
-- Définissez une durée de conservation claire, par exemple 90 jours après le tirage.
-- Prévoyez un processus de suppression sur demande.
-- N'exportez jamais les numéros complets vers Telegram, un tableur ou un outil tiers non justifié.
-- Ajoutez une mention d'âge minimum ou d'autorisation parentale si le concours cible des mineurs.
+
+## Déploiement sur Netlify
+
+- Netlify expose `NETLIFY=true` et la zone d'écriture éphémère est `/tmp` ; le projet utilise `/tmp/data` quand il détecte Netlify, sauf si `DATA_DIR` est explicitement défini.
+- Dans l'interface Netlify (Site settings → Build & deploy → Environment), définissez les variables d'environnement obligatoires :
+  - `PHONE_HASH_SECRET`
+  - `PHONE_ENCRYPTION_KEY`
+  - `ADMIN_TOKEN`
+  - Optionnellement : `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_ADMIN_ID`, `TELEGRAM_WEBHOOK_SECRET`
+- Le stockage local sur Netlify est éphémère : les fichiers dans `/tmp` peuvent être réinitialisés entre les exécutions. Pour persistance, utilisez une base de données externe (Postgres, MySQL, Firestore, etc.).
+
+Un fichier `netlify.toml` a été ajouté pour faciliter le build avec le plugin Next.js et pour définir `DATA_DIR` à `/tmp/data` par défaut.
 - En production, utilisez HTTPS, sauvegardes chiffrées, rotation des secrets et logs d'accès limités.
