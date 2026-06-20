@@ -51,15 +51,15 @@ Puis ouvrez `http://localhost:3000`.
 ## Telegram
 
 1. Créez un bot via BotFather.
-2. Renseignez `TELEGRAM_BOT_TOKEN`.
+2. Renseignez `MESSAGE_BOT_TOKEN`.
 3. Envoyez un message au bot depuis le chat admin, puis récupérez `chat.id` et votre `from.id` via `getUpdates`.
-4. Renseignez `TELEGRAM_CHAT_ID`, `TELEGRAM_ADMIN_ID` et `TELEGRAM_WEBHOOK_SECRET`.
+4. Renseignez `MESSAGE_CHAT_ID`, `MESSAGE_ADMIN_ID` et `MESSAGE_WEBHOOK_SECRET`.
 5. Configurez le webhook:
 
 ```bash
 curl "https://api.telegram.org/bot<VOTRE_TOKEN>/setWebhook" \
   -d "url=https://votre-domaine.com/api/telegram/webhook" \
-  -d "secret_token=<TELEGRAM_WEBHOOK_SECRET>"
+  -d "secret_token=<MESSAGE_WEBHOOK_SECRET>"
 ```
 
 Le message Telegram affiche seulement le numéro masqué, par exemple `+336 ** ** ** 42`, avec deux boutons: confirmer ou refuser.
@@ -104,7 +104,7 @@ Chaque inscription stocke le cadeau, le pseudo, le téléphone chiffré, l'empre
 - Le numéro complet est chiffré avec AES-256-GCM.
 - Les doublons sont détectés avec HMAC-SHA256, pas avec le numéro en clair.
 - Le webhook Telegram vérifie `X-Telegram-Bot-Api-Secret-Token`.
-- Les actions Telegram sont acceptées uniquement si `callback_query.from.id` correspond à `TELEGRAM_ADMIN_ID`.
+- Les actions Telegram sont acceptées uniquement si `callback_query.from.id` correspond à `MESSAGE_ADMIN_ID`.
 - Les validations, refus, confirmations de codes et suppressions sont journalisées dans `data/audit.log`.
 - `ADMIN_TOKEN` doit être long, unique et stocké uniquement dans les variables d'environnement.
 
@@ -118,7 +118,7 @@ Chaque inscription stocke le cadeau, le pseudo, le téléphone chiffré, l'empre
   - `PHONE_HASH_SECRET`
   - `PHONE_ENCRYPTION_KEY`
   - `ADMIN_TOKEN`
-  - Optionnellement : `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_ADMIN_ID`, `TELEGRAM_WEBHOOK_SECRET`
+  - Optionnellement : `MESSAGE_BOT_TOKEN`, `MESSAGE_CHAT_ID`, `MESSAGE_ADMIN_ID`, `MESSAGE_WEBHOOK_SECRET`
 - Le stockage local sur Netlify est éphémère : les fichiers dans `/tmp` peuvent être réinitialisés entre les exécutions. Pour persistance, utilisez une base de données externe (Postgres, MySQL, Firestore, etc.).
 
 Un fichier `netlify.toml` a été ajouté pour faciliter le build avec le plugin Next.js et pour définir `DATA_DIR` à `/tmp/data` par défaut.
