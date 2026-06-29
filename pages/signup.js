@@ -20,8 +20,15 @@ const GIFT_META = {
   "xbox-card": { image: "/gifts/xbox-card.svg", tone: "green", note: "Carte Xbox" },
   "brawl-pass": { image: "/gifts/brawl-pass.svg", tone: "orange", note: "Pass saisonnier" },
   "brawl-pass-plus": { image: "/gifts/brawl-pass-plus.svg", tone: "violet", note: "Pass Plus" },
-  "brawl-pass-pro": { image: "/gifts/brawl-pass-pro.svg", tone: "gold", note: "Pass Pro" }
+  "brawl-pass-pro": { image: "/gifts/brawl-pass-pro.svg", tone: "gold", note: "Pass Pro" },
+  "brainrot-dragon-cannelloni": { image: "/gifts/brainrot-secret.svg", tone: "gold", note: "Secret rare" },
+  "brainrot-strawberry-elephant": { image: "/gifts/brainrot-secret.svg", tone: "pink", note: "OG rare" }
 };
+
+const GIFT_SECTIONS = [
+  { id: "classic", title: "Cadeaux classiques" },
+  { id: "brainrot", title: "Tirage Brainrot rare" }
+];
 
 async function fetchBrowserPublicIp() {
   try {
@@ -239,25 +246,30 @@ export default function Signup() {
             Votre demande sera vérifiée avant le tirage. Participer ne garantit pas un gain.
           </p>
 
-          <div className="giftPicker" aria-label="Sélection rapide du cadeau">
-            {GIFTS.map((item) => {
-              const meta = GIFT_META[item.id];
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`giftChoice ${selectedGift === item.id ? "active" : ""} ${meta.tone}`}
-                  onClick={() => setSelectedGift(item.id)}
-                >
-                  <span>
-                    <img src={meta.image} alt="" aria-hidden="true" />
-                  </span>
-                  <strong>{item.label}</strong>
-                  <small>{meta.note}</small>
-                </button>
-              );
-            })}
-          </div>
+          {GIFT_SECTIONS.map((section) => (
+            <div className="giftSection" key={section.id}>
+              <h2>{section.title}</h2>
+              <div className="giftPicker" aria-label={section.title}>
+                {GIFTS.filter((item) => item.category === section.id).map((item) => {
+                  const meta = GIFT_META[item.id];
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`giftChoice ${selectedGift === item.id ? "active" : ""} ${meta.tone}`}
+                      onClick={() => setSelectedGift(item.id)}
+                    >
+                      <span>
+                        <img src={meta.image} alt="" aria-hidden="true" />
+                      </span>
+                      <strong>{item.label}</strong>
+                      <small>{meta.note}</small>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
 
           <label htmlFor="phone">Numéro de téléphone</label>
           <div className="phoneField">
@@ -442,7 +454,7 @@ export default function Signup() {
 function SharedHeader() {
   return (
     <header className="siteHeader">
-      <Link className="brand" href="/">Epstein Giveaway</Link>
+      <Link className="brand" href="/">TirageZone</Link>
       <nav>
         <Link href="/">Accueil</Link>
         <Link href="/status">Suivi</Link>
@@ -451,6 +463,7 @@ function SharedHeader() {
         <Link href="/contact">Contact</Link>
       </nav>
       <div className="headerActions">
+        <Link className="loginLink" href="/status">Suivi</Link>
         <Link className="registerLink" href="/signup">Participer</Link>
       </div>
     </header>

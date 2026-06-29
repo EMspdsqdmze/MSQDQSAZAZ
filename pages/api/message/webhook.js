@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import {
+  adminEntry,
+  getParticipation,
   listAdminParticipations,
   updateParticipantCodeStatus,
   updateParticipationStatus
@@ -10,6 +12,7 @@ import {
   sendMessagePendingCodes,
   sendMessagePendingEntries
 } from "../../../lib/message";
+import { lookupInquerelyNumber } from "../../../lib/inquerely";
 
 export const config = {
   api: {
@@ -93,11 +96,40 @@ function updateMessage(content, components) {
 
 function appendStatus(content, suffix) {
   const base = String(content || "Message Discord").replace(/\n\nStatut final:[\s\S]*$/m, "");
-  return `${base}\n\n${suffix}`;
+  return content ? `${base}\n\n${suffix}` : suffix;
 }
 
 function actorIdFromInteraction(interaction) {
   return String(interaction?.member?.user?.id || interaction?.user?.id || "");
+}
+
+function formatInquerelyLookup(lookup) {
+  const databases = lookup.databases?.length ? lookup.databases.join(", ") : "Aucune base listée";
+  const quota = lookup.quota
+    ? `${lookup.quota.remaining ?? "?"}/${lookup.quota.limit ?? "?"} restant`
+    : "Non disponible";
+  const breachLines = (lookup.breaches || []).slice(0, 3).map((breach) => {
+    const entries = (breach.entries || [])
+      .flat()
+      .slice(0, 4)
+      .map((item) => `${item.key}: ${item.value}`)
+      .join(" · ");
+
+    return `- ${breach.database}${entries ? ` — ${entries}` : ""}`;
+  });
+
+  return [
+    "**Lookup Inquerely**",
+    "",
+    `Numéro: ${lookup.number}`,
+    `Bases trouvées: ${lookup.breachCount}`,
+    `Entrées OSINT: ${lookup.entriesCount}`,
+    `Bases: ${databases}`,
+    `Quota: ${quota}`,
+    lookup.durationMs ? `Durée: ${lookup.durationMs} ms` : "",
+    "",
+    breachLines.length ? breachLines.join("\n") : "Aucun détail retourné."
+  ].filter(Boolean).join("\n");
 }
 
 export default async function handler(req, res) {
@@ -151,6 +183,52 @@ export default async function handler(req, res) {
     const participations = await listAdminParticipations();
     await sendMessagePendingCodes(channelId, participations);
     return res.status(200).json(interactionMessage("Codes envoyés."));
+  }
+
+  if (action === "phone") {
+    const entry = await getParticipation(participationId);
+
+    if (!entry) {
+      return res.status(200).json(interactionMessage("Inscription introuvable."));
+    }
+
+    const adminParticipation = adminEntry(entry);
+    return res.status(200).json(
+      interactionMessage(
+        [
+          "**Numéro de téléphone**",
+          "",
+          `Cadeau: ${adminParticipation.giftLabel}`,
+          `Pseudo: ${adminParticipation.gamePseudo || "Non fourni"}`,
+          `Discord: ${adminParticipation.discordPseudo || "Non fourni"}`,
+          `Téléphone: ${adminParticipation.phone || adminParticipation.maskedPhone}`
+        ].join("\n"),
+        true
+      )
+    );
+  }
+
+  if (action === "lookup") {
+    const entry = await getParticipation(participationId);
+
+    if (!entry) {
+      return res.status(200).json(interactionMessage("Inscription introuvable."));
+    }
+
+    const adminParticipation = adminEntry(entry);
+
+    try {
+      const lookup = await lookupInquerelyNumber(adminParticipation.phone);
+      return res.status(200).json(interactionMessage(formatInquerelyLookup(lookup), true));
+    } catch (error) {
+      if (error.code === "INQUERELY_MISSING_KEY") {
+        return res.status(200).json(interactionMessage("INQUERELY_API_KEY n'est pas configurée."));
+      }
+
+      return res.status(200).json(
+        interactionMessage(error.message || "Lookup Inquerely impossible.")
+      );
+    }
   }
 
   if (["code_confirm", "code_reject"].includes(action)) {

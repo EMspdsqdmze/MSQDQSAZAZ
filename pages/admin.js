@@ -360,11 +360,18 @@ export default function Admin() {
   return (
     <main>
       <header className="siteHeader">
-        <Link className="brand" href="/">Epstein Giveaway</Link>
+        <Link className="brand" href="/">TirageZone</Link>
         <nav>
+          <Link href="/">Accueil</Link>
+          <Link href="/status">Suivi</Link>
           <Link href="/rules">Règlement</Link>
           <Link href="/privacy">Confidentialité</Link>
+          <Link href="/contact">Contact</Link>
         </nav>
+        <div className="headerActions">
+          <Link className="loginLink" href="/status">Suivi</Link>
+          <Link className="registerLink" href="/signup">Participer</Link>
+        </div>
       </header>
 
       <section className={`adminPage ${authenticated ? "adminPageFullscreen" : ""}`}>

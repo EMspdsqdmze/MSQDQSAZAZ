@@ -11,7 +11,9 @@ const GIFT_ALIASES = {
   "xbox-card": ["xbox", "carte xbox"],
   "brawl-pass": ["brawl pass"],
   "brawl-pass-plus": ["brawl pass plus"],
-  "brawl-pass-pro": ["brawl pass pro"]
+  "brawl-pass-pro": ["brawl pass pro"],
+  "brainrot-dragon-cannelloni": ["brainrot", "steal a brainrot", "dragon", "dragon cannelloni"],
+  "brainrot-strawberry-elephant": ["brainrot", "steal a brainrot", "strawberry", "strawberry elephant"]
 };
 
 function normalizeSearch(value) {
@@ -138,7 +140,7 @@ export default function Home() {
               <Link href="/rules">Tirage</Link>
             </div>
             <div className="trustBar">
-              <Link href="/signup">8 cadeaux</Link>
+              <Link href="/signup">{GIFTS.length} cadeaux</Link>
               <Link href="/privacy">Numéro masqué</Link>
               <Link href="/rules">Sans paiement</Link>
             </div>
@@ -154,7 +156,7 @@ export default function Home() {
 function Header() {
   return (
     <header className="siteHeader">
-      <Link className="brand" href="/">Epstein Giveaway</Link>
+      <Link className="brand" href="/">TirageZone</Link>
       <nav>
         <Link className="active" href="/">Accueil</Link>
         <Link href="/status">Suivi</Link>
@@ -163,6 +165,7 @@ function Header() {
         <Link href="/contact">Contact</Link>
       </nav>
       <div className="headerActions">
+        <Link className="loginLink" href="/status">Suivi</Link>
         <Link className="registerLink" href="/signup">Participer</Link>
       </div>
     </header>
@@ -200,7 +203,7 @@ function Footer() {
       </div>
 
       <div className="footerBottom">
-        <span>© Epstein Giveaway 2026. Tous droits réservés.</span>
+        <span>© TirageZone 2026. Tous droits réservés.</span>
         <div>
           <Link href="/privacy">Politique de confidentialité</Link>
           <span>·</span>

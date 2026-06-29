@@ -1,4 +1,4 @@
-# Epstein Giveaway - site de concours transparent
+# TirageZone - site de concours transparent
 
 Application Next.js pour gérer un concours/giveaway légal et explicite, avec inscription publique, validation manuelle via Discord, stockage serveur et interface admin.
 
