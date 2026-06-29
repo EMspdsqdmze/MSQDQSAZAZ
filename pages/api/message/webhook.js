@@ -1,22 +1,104 @@
+import crypto from "crypto";
 import {
   listAdminParticipations,
   updateParticipantCodeStatus,
   updateParticipationStatus
 } from "../../../lib/db";
 import {
-  answerMessageCallback,
-  editMessageCodeMessage,
-  editMessageValidationMessage,
+  finalActionComponents,
   sendMessageAdminPanel,
   sendMessagePendingCodes,
   sendMessagePendingEntries
 } from "../../../lib/message";
 
-const getMessageWebhookSecret = () =>
-  process.env.MESSAGE_WEBHOOK_SECRET || process.env.TELEGRAM_WEBHOOK_SECRET || "";
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};
 
-const getMessageAdminId = () =>
-  String(process.env.MESSAGE_ADMIN_ID || process.env.TELEGRAM_ADMIN_ID || "");
+const DISCORD_RESPONSE = {
+  PONG: 1,
+  CHANNEL_MESSAGE_WITH_SOURCE: 4,
+  UPDATE_MESSAGE: 7
+};
+
+function getDiscordPublicKey() {
+  return process.env.DISCORD_PUBLIC_KEY || "";
+}
+
+function getDiscordAdminId() {
+  return String(process.env.DISCORD_ADMIN_ID || "");
+}
+
+async function readRawBody(req) {
+  const chunks = [];
+
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  return Buffer.concat(chunks);
+}
+
+function verifyDiscordSignature(rawBody, timestamp, signature) {
+  const publicKeyHex = getDiscordPublicKey();
+
+  if (!publicKeyHex || !timestamp || !signature) {
+    return false;
+  }
+
+  try {
+    const publicKey = crypto.createPublicKey({
+      key: Buffer.concat([
+        Buffer.from("302a300506032b6570032100", "hex"),
+        Buffer.from(publicKeyHex, "hex")
+      ]),
+      format: "der",
+      type: "spki"
+    });
+
+    return crypto.verify(
+      null,
+      Buffer.concat([Buffer.from(timestamp), rawBody]),
+      publicKey,
+      Buffer.from(signature, "hex")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function interactionMessage(content, ephemeral = true) {
+  return {
+    type: DISCORD_RESPONSE.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content,
+      flags: ephemeral ? 64 : 0,
+      allowed_mentions: { parse: [] }
+    }
+  };
+}
+
+function updateMessage(content, components) {
+  return {
+    type: DISCORD_RESPONSE.UPDATE_MESSAGE,
+    data: {
+      content,
+      components,
+      allowed_mentions: { parse: [] }
+    }
+  };
+}
+
+function appendStatus(content, suffix) {
+  const base = String(content || "Message Discord").replace(/\n\nStatut final:[\s\S]*$/m, "");
+  return `${base}\n\n${suffix}`;
+}
+
+function actorIdFromInteraction(interaction) {
+  return String(interaction?.member?.user?.id || interaction?.user?.id || "");
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -24,66 +106,51 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const expectedSecret = getMessageWebhookSecret();
-  const providedSecret = req.headers["x-telegram-bot-api-secret-token"];
+  const rawBody = await readRawBody(req);
+  const timestamp = req.headers["x-signature-timestamp"];
+  const signature = req.headers["x-signature-ed25519"];
 
-  if (!expectedSecret || providedSecret !== expectedSecret) {
-    return res.status(401).json({ error: "Invalid message secret." });
+  if (!verifyDiscordSignature(rawBody, timestamp, signature)) {
+    return res.status(401).json({ error: "Invalid Discord signature." });
   }
 
-  const adminId = getMessageAdminId();
-  const callback = req.body?.callback_query;
-  const message = req.body?.message;
-  const actorId = String(callback?.from?.id || message?.from?.id || "");
+  const interaction = JSON.parse(rawBody.toString("utf8") || "{}");
+
+  if (interaction.type === 1) {
+    return res.status(200).json({ type: DISCORD_RESPONSE.PONG });
+  }
+
+  const adminId = getDiscordAdminId();
+  const actorId = actorIdFromInteraction(interaction);
 
   if (!adminId || actorId !== adminId) {
-    if (callback?.id) {
-      await answerMessageCallback(callback.id, "Action non autorisée.");
-    }
-    return res.status(403).json({ error: "Unauthorized message user." });
+    return res.status(200).json(interactionMessage("Action non autorisée."));
   }
 
-  if (message?.text) {
-    const command = String(message.text).trim().toLowerCase();
-
-    if (["/start", "/admin", "/panel"].includes(command)) {
-      const participations = await listAdminParticipations();
-      await sendMessageAdminPanel(message.chat.id, participations);
-    }
-
-    return res.status(200).json({ ok: true });
-  }
-
-  if (!callback) {
-    return res.status(200).json({ ok: true });
-  }
-
-  const [action, participationId] = String(callback.data || "").split(":");
+  const customId = String(interaction.data?.custom_id || "");
+  const [action, participationId] = customId.split(":");
+  const channelId = interaction.channel_id;
 
   if (action === "done") {
-    await answerMessageCallback(callback.id, "Cette inscription a déjà été traitée.");
-    return res.status(200).json({ ok: true });
+    return res.status(200).json(interactionMessage("Cette action a déjà été traitée."));
   }
 
   if (action === "panel") {
     const participations = await listAdminParticipations();
-    await sendMessageAdminPanel(callback.message.chat.id, participations);
-    await answerMessageCallback(callback.id, "Panel actualise.");
-    return res.status(200).json({ ok: true });
+    await sendMessageAdminPanel(channelId, participations);
+    return res.status(200).json(interactionMessage("Panel actualisé."));
   }
 
   if (action === "panel_entries") {
     const participations = await listAdminParticipations();
-    await sendMessagePendingEntries(callback.message.chat.id, participations);
-    await answerMessageCallback(callback.id, "Inscriptions envoyées.");
-    return res.status(200).json({ ok: true });
+    await sendMessagePendingEntries(channelId, participations);
+    return res.status(200).json(interactionMessage("Inscriptions envoyées."));
   }
 
   if (action === "panel_codes") {
     const participations = await listAdminParticipations();
-    await sendMessagePendingCodes(callback.message.chat.id, participations);
-    await answerMessageCallback(callback.id, "Codes envoyés.");
-    return res.status(200).json({ ok: true });
+    await sendMessagePendingCodes(channelId, participations);
+    return res.status(200).json(interactionMessage("Codes envoyés."));
   }
 
   if (["code_confirm", "code_reject"].includes(action)) {
@@ -93,25 +160,27 @@ export default async function handler(req, res) {
       const updated = await updateParticipantCodeStatus(
         participationId,
         codeStatus,
-        `message:${actorId}`
+        `discord:${actorId}`
       );
 
       if (!updated) {
-        await answerMessageCallback(callback.id, "Inscription introuvable.");
-        return res.status(404).json({ error: "Participation not found." });
+        return res.status(200).json(interactionMessage("Inscription introuvable."));
       }
 
-      await answerMessageCallback(
-        callback.id,
-        codeStatus === "confirmed" ? "Code confirmé." : "Code refusé."
-      );
-      await editMessageCodeMessage(callback, codeStatus);
+      const label = codeStatus === "confirmed" ? "CODE CONFIRME" : "CODE REFUSE";
+      const suffix = codeStatus === "confirmed"
+        ? "Statut final: code CONFIRME."
+        : "Statut final: code REFUSE.";
 
-      return res.status(200).json({ ok: true, participation: updated });
+      return res.status(200).json(
+        updateMessage(
+          appendStatus(interaction.message?.content, suffix),
+          finalActionComponents(label, codeStatus === "confirmed" ? 3 : 4)
+        )
+      );
     } catch (error) {
       if (error.code === "CODE_MISSING") {
-        await answerMessageCallback(callback.id, "Aucun code à confirmer.");
-        return res.status(400).json({ error: "Code missing." });
+        return res.status(200).json(interactionMessage("Aucun code à confirmer."));
       }
 
       throw error;
@@ -121,22 +190,24 @@ export default async function handler(req, res) {
   const status = action === "confirm" ? "validated" : action === "reject" ? "rejected" : null;
 
   if (!status || !participationId) {
-    await answerMessageCallback(callback.id, "Action invalide.");
-    return res.status(400).json({ error: "Invalid callback data." });
+    return res.status(200).json(interactionMessage("Action invalide."));
   }
 
-  const updated = await updateParticipationStatus(participationId, status, `message:${actorId}`);
+  const updated = await updateParticipationStatus(participationId, status, `discord:${actorId}`);
 
   if (!updated) {
-    await answerMessageCallback(callback.id, "Inscription introuvable.");
-    return res.status(404).json({ error: "Participation not found." });
+    return res.status(200).json(interactionMessage("Inscription introuvable."));
   }
 
-  await answerMessageCallback(
-    callback.id,
-    status === "validated" ? "Inscription validée." : "Inscription refusée."
-  );
-  await editMessageValidationMessage(callback, status);
+  const label = status === "validated" ? "VALIDEE" : "REFUSEE";
+  const suffix = status === "validated"
+    ? "Statut final: inscription VALIDEE."
+    : "Statut final: inscription REFUSEE.";
 
-  return res.status(200).json({ ok: true, participation: updated });
+  return res.status(200).json(
+    updateMessage(
+      appendStatus(interaction.message?.content, suffix),
+      finalActionComponents(label, status === "validated" ? 3 : 4)
+    )
+  );
 }

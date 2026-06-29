@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   try {
     await notifyMessageCode(result.adminParticipation);
   } catch (error) {
-    console.error("Message code notification failed", error);
+    console.error("Discord code notification failed", error);
   }
 
   return res.status(200).json({ ok: true, participation: result.participation });

@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { giftId, phone, gamePseudo, acceptedRules, formStartedAt } = req.body || {};
+  const { giftId, phone, gamePseudo, discordPseudo, acceptedRules, formStartedAt } = req.body || {};
   const gift = findGift(giftId);
 
   if (isStrongBotTrap(req.body || {})) {
@@ -75,6 +75,7 @@ export default async function handler(req, res) {
   }
 
   const safePseudo = cleanPseudo(gamePseudo);
+  const safeDiscordPseudo = cleanPseudo(discordPseudo);
   if (gift.needsGamePseudo && safePseudo.length < 2) {
     return res.status(400).json({ error: "Pseudo requis pour ce cadeau." });
   }
@@ -93,6 +94,7 @@ export default async function handler(req, res) {
     giftId: gift.id,
     giftLabel: gift.label,
     gamePseudo: safePseudo,
+    discordPseudo: safeDiscordPseudo,
     phoneHash: phoneHash(phone),
     phoneCipher: encryptPhone(phone),
     maskedPhone: maskPhone(phone),

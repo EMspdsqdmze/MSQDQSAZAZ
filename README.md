@@ -1,6 +1,6 @@
 # Epstein Giveaway - site de concours transparent
 
-Application Next.js pour gérer un concours/giveaway légal et explicite, avec inscription publique, validation manuelle via Message, stockage serveur et interface admin.
+Application Next.js pour gérer un concours/giveaway légal et explicite, avec inscription publique, validation manuelle via Discord, stockage serveur et interface admin.
 
 ## Architecture
 
@@ -13,10 +13,10 @@ Application Next.js pour gérer un concours/giveaway légal et explicite, avec i
 - `pages/api/participations.js` : création d'inscription, validation, anti-spam, chiffrement.
 - `pages/api/participations/status.js` : consultation du statut via empreinte HMAC du téléphone.
 - `pages/api/admin/participations.js` : liste admin après authentification.
-- `pages/api/message/webhook.js` : confirmation/refus des inscriptions et codes depuis Message.
+- `pages/api/message/webhook.js` : confirmation/refus des inscriptions et codes depuis Discord.
 - `lib/db.js` : base JSON persistante et journal d'audit.
 - `lib/security.js` : normalisation, HMAC, chiffrement AES-256-GCM, masquage.
-- `lib/message.js` : notification Message avec boutons.
+- `lib/message.js` : notification Discord avec boutons.
 - `data/participations.json` : base de données créée automatiquement au premier usage.
 - `data/audit.log` : journalisation des créations, validations et refus.
 
@@ -48,28 +48,21 @@ npm run dev
 
 Puis ouvrez `http://localhost:3000`.
 
-## Message
+## Discord
 
-1. Créez un bot via BotFather.
-2. Renseignez `MESSAGE_BOT_TOKEN`.
-3. Envoyez un message au bot depuis le chat admin, puis récupérez `chat.id` et votre `from.id` via `getUpdates`.
-4. Renseignez `MESSAGE_CHAT_ID`, `MESSAGE_ADMIN_ID` et `MESSAGE_WEBHOOK_SECRET`.
-5. Configurez le webhook:
+1. Créez une application Discord dans le Developer Portal.
+2. Ajoutez un bot à l'application et invitez-le sur votre serveur avec les permissions `Send Messages` et `Use External Emojis` si besoin.
+3. Renseignez `DISCORD_BOT_TOKEN`.
+4. Récupérez l'ID du salon où recevoir les demandes et renseignez `DISCORD_CHANNEL_ID`.
+5. Récupérez votre ID Discord admin et renseignez `DISCORD_ADMIN_ID`.
+6. Copiez la clé publique de l'application dans `DISCORD_PUBLIC_KEY`.
+7. Dans Discord Developer Portal → General Information → Interactions Endpoint URL, configurez:
 
-```bash
-curl "https://api.telegram.org/bot<VOTRE_TOKEN>/setWebhook" \
-  -d "url=https://votre-domaine.com/api/message/webhook" \
-  -d "secret_token=<MESSAGE_WEBHOOK_SECRET>"
-```
+`https://votre-domaine.com/api/message/webhook`
 
 La notification affiche seulement le numéro masqué, par exemple `+336 ** ** ** 42`, avec deux boutons: confirmer ou refuser.
 
-Commandes du panel Message:
-
-- `/panel` ou `/admin` : affiche le panel admin Message.
-- `Inscriptions en attente` : liste les inscriptions à confirmer/refuser.
-- `Codes en attente` : liste les codes de participation à confirmer/refuser.
-- `Actualiser` : recharge le panel Message.
+Les boutons Discord sont acceptés uniquement si l'utilisateur qui clique correspond à `DISCORD_ADMIN_ID`.
 
 ## Base de données
 
@@ -95,16 +88,16 @@ Chaque inscription stocke le cadeau, le pseudo, le téléphone chiffré, l'empre
 - Unicité par HMAC du numéro de téléphone.
 - Statut initial `pending`, puis `validated` ou `rejected`.
 - En cas de refus depuis le panel admin web, l'administrateur peut renseigner une raison visible par le participant.
-- Après validation, le participant saisit son code directement ou revient plus tard via la page `Suivi`. Le code passe en attente, puis l'admin le confirme ou le refuse via Message ou le panel web.
+- Après validation, le participant saisit son code directement ou revient plus tard via la page `Suivi`. Le code passe en attente, puis l'admin le confirme ou le refuse via Discord ou le panel web.
 
 ## Sécurité
 
 - Le site ne demande jamais de mot de passe, code SMS, code de vérification, email sensible ou information bancaire.
-- Le numéro complet n'est jamais affiché dans la notification Message. Dans l'admin web, il est visible uniquement après authentification.
+- Le numéro complet n'est jamais affiché dans la notification Discord. Dans l'admin web, il est visible uniquement après authentification.
 - Le numéro complet est chiffré avec AES-256-GCM.
 - Les doublons sont détectés avec HMAC-SHA256, pas avec le numéro en clair.
-- Le webhook Message vérifie `X-Telegram-Bot-Api-Secret-Token`.
-- Les actions Message sont acceptées uniquement si `callback_query.from.id` correspond à `MESSAGE_ADMIN_ID`.
+- Le webhook Discord vérifie la signature `X-Signature-Ed25519`.
+- Les actions Discord sont acceptées uniquement si l'utilisateur correspond à `DISCORD_ADMIN_ID`.
 - Les validations, refus, confirmations de codes et suppressions sont journalisées dans `data/audit.log`.
 - `ADMIN_TOKEN` doit être long, unique et stocké uniquement dans les variables d'environnement.
 
@@ -118,7 +111,7 @@ Chaque inscription stocke le cadeau, le pseudo, le téléphone chiffré, l'empre
   - `PHONE_HASH_SECRET`
   - `PHONE_ENCRYPTION_KEY`
   - `ADMIN_TOKEN`
-  - Optionnellement : `MESSAGE_BOT_TOKEN`, `MESSAGE_CHAT_ID`, `MESSAGE_ADMIN_ID`, `MESSAGE_WEBHOOK_SECRET`
+  - Optionnellement : `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_ADMIN_ID`, `DISCORD_PUBLIC_KEY`
 - Le stockage local sur Netlify est éphémère : les fichiers dans `/tmp` peuvent être réinitialisés entre les exécutions. Pour persistance, utilisez une base de données externe (Postgres, MySQL, Firestore, etc.).
 
 Un fichier `netlify.toml` a été ajouté pour faciliter le build avec le plugin Next.js et pour définir `DATA_DIR` à `/tmp/data` par défaut.

@@ -414,6 +414,7 @@ export default function Admin() {
                 <tr>
                   <th>Cadeau</th>
                   <th>Pseudo</th>
+                  <th>Discord</th>
                   <th>Téléphone</th>
                   <th>IP publique</th>
                   <th>Statut</th>
@@ -429,6 +430,7 @@ export default function Admin() {
                   <tr key={entry.id}>
                     <td>{entry.giftLabel}</td>
                     <td>{entry.gamePseudo || "-"}</td>
+                    <td>{entry.discordPseudo || "-"}</td>
                     <td>
                       <span className="phoneValue">{entry.phone || entry.maskedPhone}</span>
                     </td>
@@ -526,7 +528,7 @@ export default function Admin() {
                 ))}
                 {entries.length === 0 && (
                   <tr>
-                    <td colSpan="10">Aucune inscription chargée.</td>
+                    <td colSpan="11">Aucune inscription chargée.</td>
                   </tr>
                 )}
               </tbody>

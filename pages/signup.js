@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import {
   PHONE_COUNTRIES,
@@ -33,10 +34,12 @@ async function fetchBrowserPublicIp() {
 }
 
 export default function Signup() {
+  const router = useRouter();
   const [selectedGift, setSelectedGift] = useState(GIFTS[0].id);
   const [phoneCountry, setPhoneCountry] = useState("FR");
   const [phone, setPhone] = useState("");
   const [gamePseudo, setGamePseudo] = useState("");
+  const [discordPseudo, setDiscordPseudo] = useState("");
   const [acceptedRules, setAcceptedRules] = useState(false);
   const [formStartedAt] = useState(Date.now());
   const [status, setStatus] = useState({ type: "idle", text: "" });
@@ -52,6 +55,19 @@ export default function Signup() {
     [selectedGift]
   );
   const selectedPhoneCountry = findPhoneCountry(phoneCountry);
+
+  useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+
+    const giftId = Array.isArray(router.query.gift) ? router.query.gift[0] : router.query.gift;
+    const giftExists = GIFTS.some((item) => item.id === giftId);
+
+    if (giftExists) {
+      setSelectedGift(giftId);
+    }
+  }, [router.isReady, router.query.gift]);
 
   useEffect(() => {
     let active = true;
@@ -100,6 +116,7 @@ export default function Signup() {
           giftId: selectedGift,
           phone: buildPhoneWithCountry(phoneCountry, phone),
           gamePseudo,
+          discordPseudo,
           acceptedRules,
           formStartedAt,
           browserPublicIp: publicIp
@@ -124,6 +141,7 @@ export default function Signup() {
 
     setPhone("");
     setGamePseudo("");
+    setDiscordPseudo("");
     setAcceptedRules(false);
     setTrackedParticipation(data.participation);
     setStatus({ type: "success", text: data.message });
@@ -289,6 +307,16 @@ export default function Signup() {
               />
             </>
           )}
+
+          <label htmlFor="discordPseudo">Pseudo Discord</label>
+          <input
+            id="discordPseudo"
+            type="text"
+            maxLength="32"
+            placeholder="Votre pseudo Discord"
+            value={discordPseudo}
+            onChange={(event) => setDiscordPseudo(event.target.value)}
+          />
 
           <input className="hiddenTrap" name="website" tabIndex="-1" autoComplete="off" />
           <input className="hiddenTrap" name="email" tabIndex="-1" autoComplete="off" />
